@@ -1,33 +1,27 @@
 package com.example.Movie_Review_BackendApp.service;
-
-
 import com.example.Movie_Review_BackendApp.model.Review;
 import com.example.Movie_Review_BackendApp.model.ReviewDTO;
 import com.example.Movie_Review_BackendApp.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ReviewService {
-
+    @Autowired
     private final ReviewRepository reviewRepository;
-
     public List<ReviewDTO.Response> getReviewsByMovieId(String movieId) {
         return reviewRepository.findByMovieIdOrderByCreatedAtDesc(movieId)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
-
     public List<ReviewDTO.Response> getAllReviews() {
         return reviewRepository.findAllByOrderByCreatedAtDesc()
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
-
     public ReviewDTO.Response addReview(ReviewDTO.Request request) {
         log.info("Saving review for movie: {} by: {}", request.getMovieId(), request.getUserName());
         Review review = Review.builder()
@@ -41,12 +35,10 @@ public class ReviewService {
         log.info("Review saved with id: {}", saved.getId());
         return toResponse(saved);
     }
-
     public void deleteReview(Long id) {
         reviewRepository.deleteById(id);
         log.info("Review {} deleted", id);
     }
-
     public ReviewDTO.MovieStats getMovieStats(String movieId) {
         long total = reviewRepository.countByMovieId(movieId);
         Double avg = reviewRepository.findAverageRatingByMovieId(movieId);
@@ -57,7 +49,6 @@ public class ReviewService {
                 .averageRating(roundedAvg)
                 .build();
     }
-
     private ReviewDTO.Response toResponse(Review r) {
         return ReviewDTO.Response.builder()
                 .id(r.getId())
